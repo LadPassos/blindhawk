@@ -16,5 +16,5 @@ COPY . /app
 # Exponha a porta (não estritamente necessário no Render, mas uma boa prática)
 EXPOSE 8000
 
-# Comando para rodar seu app: adaptado para usar a var $PORT do Render
-CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT}"]
+# Comando para rodar seu app: adaptado para usar a var $PORT com fallback para 8000
+CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT:-8000}"]
