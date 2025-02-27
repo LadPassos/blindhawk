@@ -48,7 +48,8 @@ logger.addHandler(console_handler)
 # Rate-Limiting (Ex.: 5 req/min em /audio-captcha)
 @app.on_event("startup")
 async def startup():
-    redis = await aioredis.from_url("redis://localhost", encoding="utf-8", decode_responses=True)
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+    redis = await aioredis.from_url(redis_url, encoding="utf-8", decode_responses=True)
     await FastAPILimiter.init(redis)
 
 # CORS
