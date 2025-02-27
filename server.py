@@ -272,9 +272,10 @@ async def verify_captcha(body: CaptchaVerifyModel):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno na verificação do CAPTCHA"
         )
-        @app.get("/")
+        
+ @app.get("/")
 async def home():
-    with open("index.html", "r", encoding="utf-8") as f:
+    with open("templates/index.html", "r", encoding="utf-8") as f:
         html_content = f.read()
     return HTMLResponse(content=html_content)
 
