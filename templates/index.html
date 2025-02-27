@@ -408,7 +408,7 @@
     try {
       showLoading(true, "Gerando novo CAPTCHA...");
 
-      const response = await fetch("http://127.0.0.1:8000/audio-captcha");
+      const response = await fetch("/audio-captcha");
       if (!response.ok) {
         const errData = await response.json();
         console.error("Erro ao criar captcha", errData);
