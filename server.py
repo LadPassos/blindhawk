@@ -8,8 +8,7 @@ import io
 import requests
 import os
 from fastapi import FastAPI, Request, HTTPException, status, Depends
-from fastapi.responses import JSONResponse
-from fastapi.responses import HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from cryptography.fernet import Fernet
@@ -272,8 +271,8 @@ async def verify_captcha(body: CaptchaVerifyModel):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno na verificação do CAPTCHA"
         )
-        
- @app.get("/")
+
+@app.get("/")
 async def home():
     with open("templates/index.html", "r", encoding="utf-8") as f:
         html_content = f.read()
