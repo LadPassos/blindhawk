@@ -265,7 +265,7 @@
     try {
       showLoading(true, "Carregando CAPTCHA inicial...");
 
-      const response = await fetch("http://127.0.0.1:8000/audio-captcha");
+      const response = await fetch("/audio-captcha");
       if (!response.ok) {
         throw new Error("Erro na requisição ao backend");
       }
@@ -335,7 +335,7 @@
       bodyData.session_token = captchaSessionToken;
     }
 
-    const response = await fetch("http://127.0.0.1:8000/verify-captcha", {
+   const response = await fetch("/verify-captcha", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(bodyData)
