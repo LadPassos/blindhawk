@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from cryptography.fernet import Fernet
+from fastapi.staticfiles import StaticFiles
 
 # Rate-Limiting (opcional)
 from fastapi_limiter import FastAPILimiter
@@ -60,6 +61,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.mount("/static", StaticFiles(directory="templates"), name="static")
 
 # Modelo de Similaridade
 model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
