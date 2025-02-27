@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+gunicorn
+sentence-transformers
+pydub
+gTTS
+requests
+cryptography
+unidecode
+nltk
+fastapi-limiter
+aioredis
