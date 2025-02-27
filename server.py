@@ -141,7 +141,12 @@ def download_freesound_sound(query, duration=5000):
 # =========================================
 # ROTAS
 # =========================================
-
+@app.get("/success")
+async def success():
+    with open("templates/success.html", "r", encoding="utf-8") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
+    
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
