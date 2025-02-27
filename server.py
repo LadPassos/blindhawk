@@ -6,7 +6,7 @@ import secrets
 import logging
 import io
 import requests
-
+import os
 from fastapi import FastAPI, Request, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
