@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Sucesso no CAPTCHA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1b1b1b;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      background-color: #2c2c2c;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #28a745;
+      margin-bottom: 1rem;
+    }
+    button {
+      background-color: #004080;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:hover {
+      background-color: #002d5f;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Você acertou o CAPTCHA!</h1>
+  <p style="color:#ccc;">Parabéns, seu acesso foi verificado com sucesso.</p>
+
+  <!-- Botão para voltar ao início (index.html) -->
+  <button onclick="window.location.href='index.html'">Voltar ao Início</button>
+</div>
+</body>
+</html>

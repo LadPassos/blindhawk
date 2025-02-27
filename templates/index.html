@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Verificação CAPTCHA - Som</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1b1b1b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0 20px;
+      color: #fff;
+    }
+
+    .container {
+      background-color: #2c2c2c;
+      padding: 2rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .logo img {
+      max-width: 250px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      color: #dc3545;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    p.description {
+      font-size: 1rem;
+      color: #ccc;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    /* Botão para expandir mais informações */
+    #info-toggle-btn {
+      background: none;
+      color: #0af;
+      text-decoration: underline;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    #info-toggle-btn:focus {
+      outline: 2px solid #fff;
+    }
+
+    #extra-info {
+      display: none;
+      color: #ccc;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      line-height: 1.3;
+    }
+
+    button {
+      background-color: #004080;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    button:hover {
+      background-color: #002d5f;
+    }
+
+    button:focus {
+      outline: 2px solid #fff;
+    }
+
+    button:disabled {
+      background-color: #808080;
+      cursor: not-allowed;
+      transition: none;
+    }
+
+    .input-container {
+      margin-top: 1.5rem;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: calc(100% - 24px);
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+      background-color: #fff; /* Contraste para acessibilidade */
+      color: #000;
+    }
+
+    input[type="text"]:focus {
+      border-color: #004080;
+      outline: none;
+    }
+
+    .message {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: #ccc;
+    }
+
+    .message.success {
+      color: #28a745;
+    }
+
+    .message.error {
+      color: #dc3545;
+    }
+
+    .loading {
+      font-size: 0.9rem;
+      color: #ccc;
+      margin-top: 0.5rem;
+    }
+
+    #captcha-audio {
+      display: none; /* Não exibe player */
+    }
+
+    /* Foco adicional para acessibilidade */
+    button:focus,
+    input[type="text"]:focus {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+    }
+
+    /* Responsividade básica para telas pequenas */
+    @media (max-width: 400px) {
+      .container {
+        padding: 1rem;
+      }
+      h1 {
+        font-size: 1.4rem;
+      }
+      button {
+        font-size: 0.9rem;
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="logo">
+    <img src="/templates/img/logo3.png" alt="Logo da Empresa">
+  </div>
+  <h1>Verificação CAPTCHA</h1>
+
+  <!-- Breve descrição para acessibilidade -->
+  <p class="description" aria-live="polite">
+    Clique em <strong>Ouvir CAPTCHA</strong> para ouvir o som que descreve uma palavra ou ação,
+    depois digite o que entendeu no campo abaixo e clique em <strong>Verificar CAPTCHA</strong>.
+    Se errar 5 vezes seguidas, haverá um bloqueio temporário para ambos os botões.
+
+    <br><br>
+    <!-- Botão para expandir "Mais informações" -->
+    <button id="info-toggle-btn" type="button" aria-label="Mais informações">
+      Mais informações
+    </button>
+  </p>
+
+  <!-- Texto expandido com mais detalhes -->
+  <p id="extra-info">
+    Caso você tenha dificuldades para ouvir o som, verifique se o volume do seu dispositivo está
+    adequado e se o áudio não está bloqueado pelo navegador. Se errar várias vezes e for bloqueado,
+    tente novamente após o tempo indicado.
+  </p>
+
+  <!-- Botão para ouvir o CAPTCHA -->
+  <button id="play-captcha" onclick="playCaptcha()" aria-label="Ouvir CAPTCHA">Ouvir CAPTCHA</button>
+
+  <!-- Áudio oculto -->
+  <audio id="captcha-audio"></audio>
+  <p class="loading" id="loading-status" style="display:none;">Carregando áudio...</p>
+
+  <!-- Campo de entrada para o usuário -->
+  <div class="input-container">
+    <label for="captcha-input" style="display:none;">Digite o que ouviu</label>
+    <input type="text" id="captcha-input"
+           placeholder="Digite o que ouviu"
+           aria-label="Campo para digitar o que você ouviu no CAPTCHA"
+           autocomplete="off">
+  </div>
+
+  <!-- Botão para verificar -->
+  <button id="verify-captcha-btn"
+          onclick="verifyCaptcha()"
+          aria-label="Verificar CAPTCHA"
+          disabled>
+    Verificar CAPTCHA
+  </button>
+
+  <!-- Mensagem de resultado -->
+  <div id="result" class="message"
+       role="status"
+       aria-live="polite">
+  </div>
+
+  <!-- Botão para gerar novo CAPTCHA -->
+  <button id="new-captcha-btn"
+          onclick="newCaptcha()"
+          disabled
+          aria-label="Gerar novo CAPTCHA">
+    Gerar Novo CAPTCHA
+  </button>
+</div>
+
+<script>
+  let captchaToken = "";
+  let captchaSessionToken = ""; // Se seu back retornar session_token
+  let captchaAudioUrl = null;   // URL do áudio atual
+  const audioElement = document.getElementById("captcha-audio");
+
+  /* Persistência de tentativas e bloqueios */
+  let attemptCount = parseInt(localStorage.getItem('attemptCount')) || 0;
+  let errorLockTime = parseInt(localStorage.getItem('errorLockTime')) || 0;
+  let newCaptchaLockTime = parseInt(localStorage.getItem('newCaptchaLockTime')) || 0;
+
+  const baseErrorLockTime = 30000; // 30 segundos
+  const maxErrorLockTime = 3600000; // 1 hora
+  const newCaptchaCooldown = 30000; // 30 segundos para gerar novo
+
+  // Ao carregar a página, gera captcha inicial
+  initializeCaptcha();
+  updateLockState();
+
+  // BOTÃO "Mais informações" => expande/oculta texto extra
+  const infoToggleBtn = document.getElementById("info-toggle-btn");
+  const extraInfo = document.getElementById("extra-info");
+  infoToggleBtn.addEventListener("click", () => {
+    if (extraInfo.style.display === "none") {
+      extraInfo.style.display = "block";
+      infoToggleBtn.textContent = "Menos informações";
+    } else {
+      extraInfo.style.display = "none";
+      infoToggleBtn.textContent = "Mais informações";
+    }
+  });
+
+  /**
+   * Gera captcha automaticamente ao abrir a página (carregamento inicial)
+   */
+  async function initializeCaptcha() {
+    try {
+      showLoading(true, "Carregando CAPTCHA inicial...");
+
+      const response = await fetch("http://127.0.0.1:8000/audio-captcha");
+      if (!response.ok) {
+        throw new Error("Erro na requisição ao backend");
+      }
+
+      const data = await response.json();
+      if (!data.audio) {
+        throw new Error("Áudio não encontrado na resposta");
+      }
+
+      // Captura token do captcha
+      captchaToken = data.captcha_id;
+      // Se seu backend retornar session_token, capture também
+      if (data.session_token) {
+        captchaSessionToken = data.session_token;
+      }
+
+      // Decodifica o áudio para armazenar localmente
+      const audioData = Uint8Array.from(atob(data.audio), c => c.charCodeAt(0));
+      const audioBlob = new Blob([audioData], { type: "audio/mpeg" });
+      captchaAudioUrl = URL.createObjectURL(audioBlob);
+
+      // Se não houver bloqueio por erro, habilita o botão "Verificar"
+      if (!isErrorLocked()) {
+        enableButton("verify-captcha-btn");
+      }
+
+      showMessage("CAPTCHA inicial gerado. Clique em 'Ouvir CAPTCHA' para ouvir.", true);
+
+    } catch (error) {
+      console.error("Erro ao gerar CAPTCHA inicial:", error);
+      showMessage("Erro ao gerar CAPTCHA inicial. Tente novamente.", false);
+    } finally {
+      showLoading(false);
+      updateLockState();
+    }
+  }
+
+  /**
+   * Tocar o áudio já carregado (sem solicitar novamente ao backend)
+   */
+  function playCaptcha() {
+    if (!captchaAudioUrl) {
+      showMessage("Ainda não há CAPTCHA disponível. Gere primeiro.", false);
+      return;
+    }
+    audioElement.src = captchaAudioUrl;
+    audioElement.play().catch(err => {
+      console.error("Erro ao reproduzir áudio:", err);
+      showMessage("Não foi possível reproduzir o áudio do CAPTCHA.", false);
+    });
+  }
+
+  /**
+   * Verifica a resposta do usuário
+   */
+  async function verifyCaptcha() {
+  const captchaInput = document.getElementById("captcha-input");
+  const userInput = captchaInput.value;
+
+  try {
+    // Exemplo: envie também session_token, se o backend exigir
+    const bodyData = {
+      captcha_text: userInput,
+      captcha_id: captchaToken
+    };
+    if (captchaSessionToken) {
+      bodyData.session_token = captchaSessionToken;
+    }
+
+    const response = await fetch("http://127.0.0.1:8000/verify-captcha", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bodyData)
+    });
+
+    if (!response.ok) {
+      // Se houver HTTPException no servidor
+      const errData = await response.json();
+      showMessage(errData.detail || "Erro na verificação do CAPTCHA.", false);
+      console.error("Erro na verificação:", errData);
+      return;
+    }
+
+    const data = await response.json();
+    showMessage(data.message, data.success);
+
+    if (!data.success) {
+      // Erro
+      attemptCount++;
+      localStorage.setItem('attemptCount', attemptCount);
+
+      // LIMPA O INPUT E FOCA (SUGESTÃO #3)
+      captchaInput.value = "";
+      captchaInput.focus();
+
+      // A cada 5 erros => bloqueio progressivo
+      if (attemptCount % 5 === 0) {
+        let blockFactor = (attemptCount / 5) - 1;
+        let dynamicLock = baseErrorLockTime * Math.pow(2, blockFactor);
+        if (dynamicLock > maxErrorLockTime) {
+          dynamicLock = maxErrorLockTime;
+        }
+        errorLockTime = Date.now() + dynamicLock;
+        localStorage.setItem('errorLockTime', errorLockTime);
+      }
+    } else {
+      // Acertou => zera tentativas
+      attemptCount = 0;
+      localStorage.setItem('attemptCount', attemptCount);
+
+      // Redireciona para a página de sucesso
+      window.location.href = "success.html";
+      return;
+    }
+  } catch (error) {
+    console.error("Erro na verificação:", error);
+    showMessage("Erro na verificação do CAPTCHA.", false);
+  }
+
+  updateLockState();
+}
+
+  /**
+   * Gera um novo captcha sob demanda
+   */
+  async function newCaptcha() {
+    // Aplica cooldown de 30s se não houver um bloqueio maior por erro
+    let now = Date.now();
+    if (!isErrorLocked()) {
+      newCaptchaLockTime = now + newCaptchaCooldown;
+      localStorage.setItem('newCaptchaLockTime', newCaptchaLockTime);
+    }
+
+    attemptCount = 0;
+    localStorage.setItem('attemptCount', attemptCount);
+
+    disableButton("verify-captcha-btn");
+    disableButton("new-captcha-btn");
+
+    try {
+      showLoading(true, "Gerando novo CAPTCHA...");
+
+      const response = await fetch("http://127.0.0.1:8000/audio-captcha");
+      if (!response.ok) {
+        const errData = await response.json();
+        console.error("Erro ao criar captcha", errData);
+        throw new Error(errData.detail || "Erro ao criar captcha");
+      }
+
+      const data = await response.json();
+      if (!data.audio) {
+        throw new Error("Áudio não encontrado na resposta");
+      }
+
+      captchaToken = data.captcha_id;
+      if (data.session_token) {
+        captchaSessionToken = data.session_token; // NOVO token
+      }
+
+      // Decodificar áudio
+      const audioData = Uint8Array.from(atob(data.audio), c => c.charCodeAt(0));
+      const audioBlob = new Blob([audioData], { type: "audio/mpeg" });
+      captchaAudioUrl = URL.createObjectURL(audioBlob);
+
+      showMessage("Novo CAPTCHA gerado. Clique em 'Ouvir CAPTCHA' para ouvir.", true);
+    } catch (error) {
+      console.error(error);
+      showMessage("Erro ao gerar novo CAPTCHA.", false);
+    } finally {
+      showLoading(false);
+      updateLockState();
+    }
+  }
+
+  // ==================== Lógica de Bloqueio =========================
+
+  function isErrorLocked() {
+    return (errorLockTime && Date.now() < errorLockTime);
+  }
+
+  function isNewCaptchaLocked() {
+    return (newCaptchaLockTime && Date.now() < newCaptchaLockTime);
+  }
+
+  function updateLockState() {
+    const now = Date.now();
+    const verifyBtn = document.getElementById("verify-captcha-btn");
+    const newCaptchaBtn = document.getElementById("new-captcha-btn");
+
+    // 1) Bloqueio por erros?
+    if (isErrorLocked()) {
+      let remain = Math.ceil((errorLockTime - now) / 1000);
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = `Aguarde ${remain}s...`;
+
+      newCaptchaBtn.disabled = true;
+      newCaptchaBtn.textContent = `Aguarde ${remain}s...`;
+
+      setTimeout(updateLockState, 1000);
+      return;
+    } else {
+      // Se não tem erroLock => pode habilitar Verificar se captcha já existe
+      verifyBtn.disabled = (captchaToken === "");
+      verifyBtn.textContent = "Verificar CAPTCHA";
+    }
+
+    // 2) Bloqueio de "Gerar Novo CAPTCHA"?
+    if (isNewCaptchaLocked()) {
+      let remain = Math.ceil((newCaptchaLockTime - now) / 1000);
+      newCaptchaBtn.disabled = true;
+      newCaptchaBtn.textContent = `Aguarde ${remain}s...`;
+      setTimeout(updateLockState, 1000);
+      return;
+    } else {
+      newCaptchaBtn.disabled = false;
+      newCaptchaBtn.textContent = "Gerar Novo CAPTCHA";
+    }
+  }
+
+  // ==================== Funções de Ajuda ===========================
+
+  function disableButton(id) {
+    const btn = document.getElementById(id);
+    btn.disabled = true;
+  }
+
+  function enableButton(id) {
+    const btn = document.getElementById(id);
+    btn.disabled = false;
+  }
+
+  function showLoading(show, text = "") {
+    const loadingStatus = document.getElementById("loading-status");
+    loadingStatus.style.display = show ? "block" : "none";
+    if (show) {
+      loadingStatus.textContent = text;
+    }
+  }
+
+  function showMessage(msg, success) {
+    const resultDiv = document.getElementById("result");
+    resultDiv.textContent = msg;
+    resultDiv.className = `message ${success ? "success" : "error"}`;
+  }
+</script>
+</body>
+</html>
