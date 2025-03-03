@@ -165,4 +165,3 @@ Criptografia da Resposta: Respostas podem ser armazenadas criptografadas usando 
 ---
 
 Este projeto foi desenvolvido para fins educacionais, destacando boas práticas de segurança em aplicações web. 
-Assim que avaliado pelo professor da disciplina esse repositorio vai ser privado 🌟
